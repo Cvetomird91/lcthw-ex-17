@@ -42,6 +42,10 @@ void die(const char *message, struct Connection *conn) {
         free(conn->db);
     }
 
+    if (conn->file) {
+        fclose(conn->file);
+    }
+
 	if (conn) {
         free(conn);
     }
