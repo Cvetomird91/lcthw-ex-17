@@ -27,7 +27,6 @@ struct Connection {
 };
 
 //function for error handling
-//void die(const char *message, Connection *conn) {
 void die(const char *message, struct Connection *conn) {
 	//check if the errno variable is set (system variable)
 	if(errno) {
@@ -140,6 +139,11 @@ void Database_set(struct Connection *conn, int id, const char *name, const char 
 	//Demonstrate the strncpy bug
 	if (!res) die("Name copy failed", conn);
 
+	/*
+        dest − This is the pointer to the destination array where the content is to be copied.
+        src − This is the string to be copied.
+        n − The number of characters to be copied from source.
+    */
 	res = strncpy(addr->email, email, MAX_DATA);
 	if (!res) die("Email copy failed", conn);
 }
@@ -176,6 +180,7 @@ int main(int argc, char** argv){
 
 	char *filename = argv[1];
 	char action = argv[2][0];
+
 	struct Connection *conn = Database_open(filename, action);
 
 	if (argc <3) die("USAGE: ex17 <dbfile> <action> [action params]", conn);
@@ -207,7 +212,6 @@ int main(int argc, char** argv){
 			Database_delete(conn, id);
 			Database_write(conn);
 			break;
-
 		case 'l':
 			Database_list(conn);
 			break;
