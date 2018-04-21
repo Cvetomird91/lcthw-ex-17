@@ -17,6 +17,8 @@ struct Address {
 
 //declare struct that represents the database
 struct Database {
+	int max_rows;
+	int max_data;
 	struct Address rows[MAX_ROWS];
 };
 
@@ -121,8 +123,11 @@ void Database_write(struct Connection *conn) {
 	if (rc == -1) die ("Cannot flush database.", conn);
 }
 
-void Database_create(struct Connection *conn) {
+void Database_create(struct Connection *conn, int max_data, int max_rows) {
 	int i = 0;
+
+	conn->db->max_data = max_data;
+	conn->db->max_rows = max_rows;
 
 	for(i = 0; i < MAX_ROWS; i++) {
 		struct Address addr = {.id = i, .set = 0};
@@ -188,11 +193,19 @@ int main(int argc, char** argv){
 	int id = 0;
 
 	if(argc > 3) id = atoi(argv[3]);
-	if(id >= MAX_ROWS) die("There's not that many records", conn);
+	//if(id >= MAX_ROWS) die("There's not that many records", conn);
+	//if(id >= conn->db->max_rowss) die("There's not that many records", conn);
+
+	int max_rows;
+	int max_data;
 
 	switch (action) {
 		case 'c':
-			Database_create(conn);
+
+			max_rows = atoi(argv[4]);
+			max_data = atoi(argv[5]);
+
+			Database_create(conn, max_data, max_rows);
 			Database_write(conn);
 			break;
 		case 'g':
