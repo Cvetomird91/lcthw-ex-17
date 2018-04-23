@@ -209,13 +209,17 @@ void Database_set_size(struct Connection *conn) {
 }
 
 void Database_get_size(struct Connection *conn) {
-	rewind(conn->file);
-    struct Sizes *buff = (struct Sizes*)malloc(sizeof(struct Sizes));
+	//rewind(conn->file);
+	fseek(conn->file, 0, SEEK_SET);
 
-	fread(buff, sizeof(struct Sizes), 1, conn->file);
+    printf("Data from the connection: %d %d\n", conn->db->sizes->max_rows, conn->db->sizes->max_data);
 
-    printf("Data from the file: %d %d", buff->max_rows, buff->max_data);
-    exit(0);
+    int rc = fread(conn->db->sizes, sizeof(struct Sizes), 1, conn->file);
+
+    if (!rc) {
+        printf("Data from the file: %d %d\n", conn->db->sizes->max_rows, conn->db->sizes->max_data);
+        fseek(conn->file, sizeof(struct Sizes) + 1, SEEK_SET);
+    }
 
 }
 
@@ -259,6 +263,7 @@ int main(int argc, char** argv){
 			if (argc != 4) die("Need an id to get", conn);
 
 			Database_get(conn, id);
+			Database_get_size(conn);
 			break;
 		case 's':
 			if(argc != 6) die("Need id, name, email to set", conn);
