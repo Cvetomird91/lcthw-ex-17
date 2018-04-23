@@ -15,9 +15,16 @@ struct Address {
 	char email[MAX_DATA];
 };
 
+//declare struct for the database sizes
+struct Sizes {
+    int max_rows;
+	int max_data;
+};
+
 //declare struct that represents the database
 struct Database {
-	int max_rows;
+    struct Sizes *sizes;
+    int max_rows;
 	int max_data;
 	struct Address rows[MAX_ROWS];
 };
@@ -37,11 +44,16 @@ void die(const char *message, struct Connection *conn) {
 	} else {
 		//otherwise print the string passed to the function
 		printf("ERROR: %s\n", message);
-	}
+    }
 
-	if (conn->db) {
+    if (conn->db) {
         free(conn->db);
     }
+
+    /*
+    if (conn->db->sizes) {
+        free(conn->db->sizes);
+    }*/
 
     if (conn->file) {
         fclose(conn->file);
@@ -82,6 +94,8 @@ struct Connection *Database_open(const char *filename, char mode) {
 	if(!conn) die("Memory error!", conn);
 
 	conn->db = malloc(sizeof(struct Database));
+
+	conn->db->sizes = malloc(sizeof(struct Sizes));
 	if (!conn->db) {
         die ("Memory error!", conn);
 	}
@@ -108,6 +122,7 @@ struct Connection *Database_open(const char *filename, char mode) {
 void Database_close(struct Connection *conn) {
 	if(conn){
 		if(conn->file) fclose(conn->file);
+		if(conn->db->sizes) free(conn->db->sizes);
 		if(conn->db) free(conn->db);
 		free(conn);
 	}
@@ -126,10 +141,10 @@ void Database_write(struct Connection *conn) {
 void Database_create(struct Connection *conn, int max_data, int max_rows) {
 	int i = 0;
 
-	conn->db->max_data = max_data;
-	conn->db->max_rows = max_rows;
+	conn->db->sizes->max_data = max_data;
+	conn->db->sizes->max_rows = max_rows;
 
-	for(i = 0; i < MAX_ROWS; i++) {
+	for(i = 0; i < conn->db->sizes->max_rows; i++) {
 		struct Address addr = {.id = i, .set = 0};
 		conn->db->rows[i] = addr;
 	}
@@ -188,7 +203,7 @@ int main(int argc, char** argv){
 
 	struct Connection *conn = Database_open(filename, action);
 
-	if (argc <3) die("USAGE: ex17 <dbfile> <action> [action params]", conn);
+	if (argc <3) die("USAGE: ex17 <dbfile> <action> [action params]\n or ex17 <dbfile> c <max_rows> <max_data>", conn);
 
 	int id = 0;
 
@@ -199,11 +214,14 @@ int main(int argc, char** argv){
 	int max_rows;
 	int max_data;
 
+	if (action == 'c' && argc != 5)
+        die ("Please, specify maximum database rows and data size: ex17 <dbfile> c <max_rows> <max_data>", conn);
+
 	switch (action) {
 		case 'c':
 
-			max_rows = atoi(argv[4]);
-			max_data = atoi(argv[5]);
+			max_rows = atoi(argv[3]);
+			max_data = atoi(argv[4]);
 
 			Database_create(conn, max_data, max_rows);
 			Database_write(conn);

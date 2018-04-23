@@ -1,8 +1,8 @@
 #!/bin/bash
 
-VALGRIND_CALL="valgrind --leak-check=full --show-leak-kinds=all ./bin/Debug/ex17 db.dat "
+VALGRIND_CALL="colour-valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./bin/Debug/ex17 db.dat "
 PARAMETERS=(
-	"c" "s 1 ceco ceco@ceco.com" "g 1" "l" "d 1"
+	"c 100 512" "s 1 ceco ceco@ceco.com" "g 1" "l" "d 1"
 )
 
 for i in "${PARAMETERS[@]}"; do
