@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
+#include <stdbool.h>
 
 #define MAX_DATA 512
 #define MAX_ROWS 100
@@ -196,14 +197,40 @@ void Database_list(struct  Connection *conn) {
 	}
 }
 
+void Database_set_size(struct Connection *conn) {
+	rewind(conn->file);
+
+	int rc = fwrite(conn->db->sizes, sizeof(struct Sizes), 1, conn->file);
+	if(rc != 1 ) die("Failed to write database.", conn);
+
+	rc = fflush(conn->file);
+	if (rc == -1) die ("Cannot flush database.", conn);
+
+}
+
+void Database_get_size(struct Connection *conn) {
+	rewind(conn->file);
+    struct Sizes *buff = (struct Sizes*)malloc(sizeof(struct Sizes));
+
+	fread(buff, sizeof(struct Sizes), 1, conn->file);
+
+    printf("Data from the file: %d %d", buff->max_rows, buff->max_data);
+    exit(0);
+
+}
+
 int main(int argc, char** argv){
+
+    struct Connection *conn = malloc(sizeof(struct Connection));
+
+    if (argc <3)
+    die("USAGE: ex17 <dbfile> <action> [action params]\nor ex17 <dbfile> c <max_rows> <max_data>", conn);
 
 	char *filename = argv[1];
 	char action = argv[2][0];
 
-	struct Connection *conn = Database_open(filename, action);
-
-	if (argc <3) die("USAGE: ex17 <dbfile> <action> [action params]\n or ex17 <dbfile> c <max_rows> <max_data>", conn);
+	free(conn);
+	conn = Database_open(filename, action);
 
 	int id = 0;
 
@@ -224,7 +251,9 @@ int main(int argc, char** argv){
 			max_data = atoi(argv[4]);
 
 			Database_create(conn, max_data, max_rows);
-			Database_write(conn);
+			Database_set_size(conn);
+
+			Database_get_size(conn);
 			break;
 		case 'g':
 			if (argc != 4) die("Need an id to get", conn);
