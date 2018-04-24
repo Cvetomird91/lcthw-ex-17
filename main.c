@@ -85,6 +85,9 @@ void Database_load(struct Connection *conn) {
 	if (!conn)
         die("Failed to load database.", conn);
 
+    //fseek(conn->file)
+    fseek(conn->file, sizeof(struct Sizes) + 1, SEEK_SET);
+
 	int rc = fread(conn->db, sizeof(struct Database), 1, conn->file);
 	if (rc != 1) die("Failed to load database.", conn);
 }
@@ -214,7 +217,7 @@ void Database_get_size(struct Connection *conn) {
 
     printf("Data from the connection: %d %d\n", conn->db->sizes->max_rows, conn->db->sizes->max_data);
 
-    int rc = fread(conn->db->sizes, sizeof(struct Sizes), 1, conn->file);
+    int rc = fread(conn->db->sizes, sizeof(conn->db->sizes), 2, conn->file);
 
     if (!rc) {
         printf("Data from the file: %d %d\n", conn->db->sizes->max_rows, conn->db->sizes->max_data);
@@ -261,6 +264,8 @@ int main(int argc, char** argv){
 			break;
 		case 'g':
 			if (argc != 4) die("Need an id to get", conn);
+
+			Database_get_size(conn);break;
 
 			Database_get(conn, id);
 			Database_get_size(conn);
