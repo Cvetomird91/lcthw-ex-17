@@ -7,12 +7,21 @@
 #define MAX_DATA 512
 #define MAX_ROWS 100
 
+//#define DEBUG printf("File position for debugging: %ld\n", ftell(conn->file))
+#define DEBUG
+
 //declare struct for address record
 struct Address {
 	int id;
 	int set;
 	char name[MAX_DATA];
 	char email[MAX_DATA];
+};
+
+//define struct for database size settings
+struct Config {
+    int max_data;
+    int max_rows;
 };
 
 //declare struct that represents the database
@@ -24,6 +33,7 @@ struct Database {
 struct Connection {
 	FILE *file;
 	struct Database *db;
+	struct Config *config;
 };
 
 //function for error handling
@@ -43,6 +53,10 @@ void die(const char *message, struct Connection *conn) {
 
     if (conn->file) {
         fclose(conn->file);
+    }
+
+    if(conn->config) {
+        free(conn->config);
     }
 
 	if (conn) {
@@ -70,7 +84,14 @@ void Database_load(struct Connection *conn) {
 	if (!conn)
         die("Failed to load database.", conn);
 
-	int rc = fread(conn->db, sizeof(struct Database), 1, conn->file);
+    conn->config = malloc(sizeof(struct Config));
+
+    rewind(conn->file);
+    int rc = fread(conn->config, sizeof(struct Config), 1, conn->file);
+
+//    fseek(conn->file, sizeof(struct Config), SEEK_SET);
+
+	rc = fread(conn->db, sizeof(struct Database), 1, conn->file);
 	if (rc != 1) die("Failed to load database.", conn);
 }
 
@@ -93,8 +114,10 @@ struct Connection *Database_open(const char *filename, char mode) {
 		//if we choose another option open in r+ mode (for update, both for reading and writing)
 		conn->file = fopen(filename, "r+");
 
-		if(conn->file)
+		if(conn->file) {
+            //fseek(conn->file, sizeof(struct Config), SEEK_SET);
 			Database_load(conn);
+        }
 	}
 
 	if(!conn->file) die("Failed to open the file", conn);
@@ -107,12 +130,13 @@ void Database_close(struct Connection *conn) {
 	if(conn){
 		if(conn->file) fclose(conn->file);
 		if(conn->db) free(conn->db);
+		if(conn->config) free(conn->config);
 		free(conn);
 	}
 }
 
 void Database_write(struct Connection *conn) {
-	rewind(conn->file);
+	fseek(conn->file, sizeof(struct Config), SEEK_SET);
 
 	int rc = fwrite(conn->db, sizeof(struct Database), 1, conn->file);
 	if(rc != 1 ) die("Failed to write database.", conn);
@@ -121,7 +145,18 @@ void Database_write(struct Connection *conn) {
 	if (rc == -1) die ("Cannot flush database.", conn);
 }
 
-void Database_create(struct Connection *conn) {
+void Database_create(struct Connection *conn, int max_data, int max_rows) {
+
+    conn->config = (struct Config*)malloc(sizeof(struct Config));
+    conn->config->max_data = max_data;
+    conn->config->max_rows = max_rows;
+
+    DEBUG;
+
+    rewind(conn->file);
+    fwrite (conn->config, sizeof(struct Config), 1, conn->file);
+
+    //DEBUG;
 	int i = 0;
 
 	for(i = 0; i < MAX_ROWS; i++) {
@@ -149,6 +184,8 @@ void Database_set(struct Connection *conn, int id, const char *name, const char 
 }
 
 void Database_get(struct Connection *conn, int id) {
+    //fseek(conn->file, sizeof(struct Config), SEEK_SET);DEBUG;
+
 	struct Address *addr = &conn->db->rows[id];
 
 	if(addr->set) {

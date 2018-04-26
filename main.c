@@ -21,12 +21,20 @@ int main(int argc, char** argv){
 	int id = 0;
 
 	if(argc > 3) id = atoi(argv[3]);
-	if(id >= MAX_ROWS) die("There's not that many records", conn);
+	if(id >= MAX_ROWS && action != 'c') die("There's not that many records", conn);
+
+	int max_rows;
+	int max_data;
 
 	switch (action) {
 		case 'c':
-			Database_create(conn);
+
+            max_rows = atoi(argv[3]);
+            max_data = atoi(argv[4]);
+
+			Database_create(conn, max_data, max_rows);
 			Database_write(conn);
+
 			break;
 		case 'g':
 			if (argc != 4) die("Need an id to get", conn);
