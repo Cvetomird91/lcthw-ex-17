@@ -7,9 +7,6 @@
 #define MAX_DATA 512
 #define MAX_ROWS 100
 
-//#define DEBUG printf("File position for debugging: %ld\n", ftell(conn->file))
-#define DEBUG
-
 //declare struct for address record
 struct Address {
 	int id;
@@ -151,12 +148,9 @@ void Database_create(struct Connection *conn, int max_data, int max_rows) {
     conn->config->max_data = max_data;
     conn->config->max_rows = max_rows;
 
-    DEBUG;
-
     rewind(conn->file);
     fwrite (conn->config, sizeof(struct Config), 1, conn->file);
 
-    //DEBUG;
 	int i = 0;
 
 	for(i = 0; i < MAX_ROWS; i++) {
@@ -184,8 +178,6 @@ void Database_set(struct Connection *conn, int id, const char *name, const char 
 }
 
 void Database_get(struct Connection *conn, int id) {
-    //fseek(conn->file, sizeof(struct Config), SEEK_SET);DEBUG;
-
 	struct Address *addr = &conn->db->rows[id];
 
 	if(addr->set) {
