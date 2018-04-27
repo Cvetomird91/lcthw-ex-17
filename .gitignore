@@ -1,0 +1,13 @@
+CMakeCache.txt
+CMakeFiles/
+
+*.cmake
+Makefile
+bin/
+obj/
+
+*.cbp
+*.depend
+*.layout*
+*.dat
+vgcore.*
