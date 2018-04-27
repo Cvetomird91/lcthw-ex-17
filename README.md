@@ -8,6 +8,8 @@ The first bytes of the file store configurations for the database and are always
 against the database are performed. The metadata contains the maximum number of rows the database can have and the maximum
 length in bytes of the emails and names of the records.
 
+I have added a BASH shell script for performing automated testing in the utils/ directory.
+
 I have added a CMake config for generating Code::Blocks project files.
 
 You can generate the project files for the Debug and Release modes respectively:
@@ -20,4 +22,3 @@ cmake -G "CodeBlocks - Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug
 cmake -G "CodeBlocks - Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug
 ```
 
-I have added a BASH shell script for performing automated testing in the utils/ directory.
