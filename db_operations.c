@@ -7,31 +7,7 @@
 #define MAX_DATA 512
 #define MAX_ROWS 100
 
-//declare struct for address record
-struct Address {
-	int id;
-	int set;
-	char name[MAX_DATA];
-	char email[MAX_DATA];
-};
-
-//define struct for database size settings
-struct Config {
-    int max_data;
-    int max_rows;
-};
-
-//declare struct that represents the database
-struct Database {
-	struct Address rows[MAX_ROWS];
-};
-
-//declare a struct that represents the DB connection to a file pointer and Database struct
-struct Connection {
-	FILE *file;
-	struct Database *db;
-	struct Config *config;
-};
+#include "db_operations.h"
 
 //function for error handling
 void die(const char *message, struct Connection *conn) {
@@ -85,8 +61,6 @@ void Database_load(struct Connection *conn) {
 
     rewind(conn->file);
     int rc = fread(conn->config, sizeof(struct Config), 1, conn->file);
-
-//    fseek(conn->file, sizeof(struct Config), SEEK_SET);
 
 	rc = fread(conn->db, sizeof(struct Database), 1, conn->file);
 	if (rc != 1) die("Failed to load database.", conn);
