@@ -86,8 +86,6 @@ void Database_load(struct Connection *conn) {
     rewind(conn->file);
     int rc = fread(conn->config, sizeof(struct Config), 1, conn->file);
 
-//    fseek(conn->file, sizeof(struct Config), SEEK_SET);
-
 	rc = fread(conn->db, sizeof(struct Database), 1, conn->file);
 	if (rc != 1) die("Failed to load database.", conn);
 }
@@ -112,7 +110,6 @@ struct Connection *Database_open(const char *filename, char mode) {
 		conn->file = fopen(filename, "r+");
 
 		if(conn->file) {
-            //fseek(conn->file, sizeof(struct Config), SEEK_SET);
 			Database_load(conn);
         }
 	}
@@ -153,7 +150,7 @@ void Database_create(struct Connection *conn, int max_data, int max_rows) {
 
 	int i = 0;
 
-	for(i = 0; i < MAX_ROWS; i++) {
+	for(i = 0; i < conn->config->max_rows; i++) {
 		struct Address addr = {.id = i, .set = 0};
 		conn->db->rows[i] = addr;
 	}
@@ -164,7 +161,7 @@ void Database_set(struct Connection *conn, int id, const char *name, const char 
 	if(addr->set) die("Already set, delete it first.", conn);
 
 	addr->set = 1;
-	char *res = strncpy(addr->name, name, MAX_DATA);
+	char *res = strncpy(addr->name, name, conn->config->max_data);
 	//Demonstrate the strncpy bug
 	if (!res) die("Name copy failed", conn);
 
@@ -173,7 +170,7 @@ void Database_set(struct Connection *conn, int id, const char *name, const char 
         src − This is the string to be copied.
         n − The number of characters to be copied from source.
     */
-	res = strncpy(addr->email, email, MAX_DATA);
+	res = strncpy(addr->email, email, conn->config->max_data);
 	if (!res) die("Email copy failed", conn);
 }
 
@@ -196,7 +193,7 @@ void Database_list(struct  Connection *conn) {
 	int i = 0;
 	struct Database *db = conn->db;
 
-	for (i = 0; i < MAX_ROWS; i++) {
+	for (i = 0; i < conn->config->max_rows; i++) {
 		struct Address *cur = &db->rows[i];
 
 		if(cur->set){
