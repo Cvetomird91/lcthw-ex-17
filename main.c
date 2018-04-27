@@ -21,7 +21,7 @@ int main(int argc, char** argv){
 	int id = 0;
 
 	if(argc > 3) id = atoi(argv[3]);
-	if(id >= conn->config->max_rows && action != 'c') die("There's not that many records", conn);
+	if(id >= MAX_ROWS && action != 'c') die("There's not that many records", conn);
 
 	int max_rows;
 	int max_data;
