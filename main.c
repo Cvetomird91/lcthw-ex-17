@@ -6,10 +6,6 @@
 
 #include "db_operations.h"
 
-#define MAX_DATA 512
-#define MAX_ROWS 100
-
-
 int main(int argc, char** argv){
 
 	char *filename = argv[1];

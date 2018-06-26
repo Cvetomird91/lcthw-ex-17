@@ -1,5 +1,8 @@
-#define MAX_DATA 512
-#define MAX_ROWS 100
+#ifndef _db_operations_h
+#define _db_operations_h
+
+#define MAX_DATA 1024
+#define MAX_ROWS 2048
 
 //declare struct for address record
 struct Address {
@@ -38,3 +41,5 @@ void Database_set(struct Connection *conn, int id, const char *name, const char 
 void Database_get(struct Connection *conn, int id);
 void Database_delete(struct Connection *conn, int id);
 void Database_list(struct  Connection *conn);
+
+#endif
