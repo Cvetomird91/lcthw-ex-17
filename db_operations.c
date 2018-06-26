@@ -133,6 +133,9 @@ void Database_set(struct Connection *conn, int id, const char *name, const char 
 	struct Address *addr = &conn->db->rows[id];
 	if(addr->set) die("Already set, delete it first.", conn);
 
+    if(strlen(name) >= conn->config->max_data) die("Name too long.", conn);
+    if(strlen(email) >= conn->config->max_data) die("Email too long.", conn);
+
 	addr->set = 1;
 	char *res = strncpy(addr->name, name, conn->config->max_data);
 	//Demonstrate the strncpy bug
